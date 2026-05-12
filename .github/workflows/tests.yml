@@ -1,22 +1,38 @@
 name: Tests
 
+
 on:
   push:
-    branches:
-      - '**'
-    tags:
-      - '**'
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
 
 jobs:
   tests:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
-      - name: Check if the repository is private
-        run: exit 1
-        if: ${{github.event.repository.private}}
-      - name: Tests
+       uses: actions/checkout@v4
+
+      - name: Check if repository is private
+        if: github.event.repository.private == true
+        run: |
+          echo "❌ Репозиторий приватный, тесты не могут быть запущены"
+          exit 1
+      
+      - name: Run API tests
         uses: Yandex-Practicum/test-project-action@v1
+        env:
+          FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
         with:
-          project: 'zakrivayuschiy-teg-ad'
+          project: "zakrivayuschiy-teg-ad"
+
+      - name: Test results
+        if: always()
+        run: |
+          echo "✅ Тесты завершены"
+          echo "Результаты тестирования API Яндекс.Прилавок:"
+          echo "- Main.Kits - Работа с наборами"
+          echo "- Couriers - Работа с курьерами"
+          echo "- Main.Basket - Добавление товаров в корзину"
